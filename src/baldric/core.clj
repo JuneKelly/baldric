@@ -11,14 +11,34 @@
   "org.pushingpixels.substance.api.skin.MistSilverSkin")
 
 
-(defn top-panel []
-  (horizontal-panel :items [(button :text "Menu" :margin (su/to-insets 5))
-                            (text :editable? true)]))
+(declare activate)
 
 
-(defn main-display-area []
+(def top-panel
+  (atom (horizontal-panel :items [(button :text "Menu" :margin (su/to-insets 5))
+                                  (text :editable? true)])))
+
+
+(def demo-app (atom
   (scrollable (text :multi-line? true
-                    :text "Welcome to Baldric!")))
+                    :text "Welcome to Baldric!"))))
+
+
+(def main-panel
+  (atom (border-panel :hgap 5
+                      :vgap 5
+                      :north @top-panel
+                      :center @demo-app)))
+
+
+(defn set-content [w]
+  (config! main-panel :center (scrollable w)))
+
+
+(defn load-app [location]
+  (do
+    (eval (read-string (slurp location)))
+    (activate)))
 
 
 (defn -main [& args]
@@ -28,11 +48,8 @@
         :title "Baldric v0.0.1"
         :on-close :exit
         :minimum-size [800 :by 600]
-        :content (border-panel
-                   :vgap 5
-                   :hgap 5
-                   :north (top-panel)
-                   :center (main-display-area)))
+        :content @main-panel)
       pack!
-      show!)))
+      show!))
+  (load-app "http://localhost:8000/example.clj"))
 
